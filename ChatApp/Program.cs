@@ -10,7 +10,10 @@ builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
 
 // Add SignalR
-builder.Services.AddSignalR();
+builder.Services.AddSignalR(options =>
+{
+    options.EnableDetailedErrors = true;
+});
 
 // Add MongoDB
 builder.Services.AddSingleton<IMongoClient>(sp => new MongoClient("your_mongodb_connection_string"));
@@ -32,6 +35,8 @@ var app = builder.Build();
 
 // Use CORS
 app.UseCors("AllowAllOrigins");
+
+app.UseWebSockets(); // Enable WebSockets
 
 // Map SignalR Hub
 app.MapHub<ChatHub>("/chatHub");
