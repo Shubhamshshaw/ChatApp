@@ -45,7 +45,7 @@ public class ChatHub : Hub
 
     public async Task SendMessage(string senderId, string userName, string message)
     {
-        var receiverLists = users.Where(s => s.UserName == userName).Select(s => s.ConnectionIdList);
+        var receiverLists = users.Where(s => s.UserName == userName || s.UserName == senderId).Select(s => s.ConnectionIdList);
         var receivers = new List<string>();
         foreach (var receiver in receiverLists)
         {
