@@ -18,5 +18,17 @@ namespace ChatApp.Controllers
                 .ToList();
             return messages;
         }
+
+        [HttpGet("inboxMessages/{userName}/{receiverId}")]
+        public List<Message> GetInboxMessages(string userName, string receiverId)
+        {
+            List<Message> messages1 = ChatHub.messages;
+            List<Message> messages = ChatHub.messages
+                .Where(m => (m.SenderId == userName && m.ReceiverId == receiverId) ||
+                             (m.SenderId == receiverId && m.ReceiverId == userName))
+                .OrderByDescending(m => m.SentOn) // Order by SentOn to get the latest messages first
+                .ToList();
+            return messages;
+        }
     }
 }
