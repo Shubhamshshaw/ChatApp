@@ -26,7 +26,7 @@ namespace ChatApp.Controllers
             List<Message> messages = ChatHub.messages
                 .Where(m => (m.SenderId == userName && m.ReceiverId == receiverId) ||
                              (m.SenderId == receiverId && m.ReceiverId == userName))
-                .OrderByDescending(m => m.SentOn) // Order by SentOn to get the latest messages first
+                .OrderBy(m => m.SentOn) // Order by SentOn to get the latest messages last
                 .ToList();
             return messages;
         }
