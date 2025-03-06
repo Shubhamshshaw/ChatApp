@@ -1,11 +1,12 @@
 ﻿using ChatApp.Models;
 using Microsoft.AspNetCore.SignalR;
 using MongoDB.Driver.Core.Servers;
+
 public class ChatHub : Hub
 {
-    static int counter = 0;
-    static List<User> users = new List<User>();
-    static List<Message> messages = new List<Message>();
+    public static int counter = 0;
+    public static List<User> users = new List<User>();
+    public static List<Message> messages = new List<Message>();
 
     public ChatHub()
     {

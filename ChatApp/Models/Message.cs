@@ -10,6 +10,7 @@ public class Message
     public MessageType MessageType { get; set; }
     public List<Reaction> Reactions { get; set; }
     public List<Guid> ReceivedBy { get; set; }
+    public DateTime SentOn { get; set; }
     public List<Guid> SeenBy { get; set; }
     public List<Attachment> Attachments { get; set; }
 }
