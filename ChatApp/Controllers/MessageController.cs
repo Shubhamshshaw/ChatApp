@@ -23,8 +23,6 @@ namespace ChatApp.Controllers
             new ChatHub();
             List<Message?> messages = ChatHub.messages
                 .Where(m => m.ReceiverId == userId || m.SenderId == userId)
-                .GroupBy(m => m.SenderId)
-                .Select(g => g.OrderByDescending(m => m.SentOn).FirstOrDefault())
                 .ToList();
             var chatLists = _mapper.Map<List<ChatList>>(messages);
 
