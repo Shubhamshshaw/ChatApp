@@ -16,7 +16,7 @@ namespace ChatApp.Controllers
         {
             _mapper = mapper;
         }
-        [HttpGet("allLastMessages/{userId}")]
+        [HttpGet("allLastChats/{userId}")]
         public List<ChatList> GetAllLastMessages(string userId)
         {
             List<Message?> messages = ChatHub.messages
