@@ -11,11 +11,12 @@ namespace ChatApp.Controllers
         [HttpPost("registerUser/{userName}/{userId}")]
         public ActionResult<string> GetAllLastMessages(string userName, string userId)
         {
+            Random random = new Random();
             if (ChatHub.users.Where(u => u.UserId == userId).ToList().Any())
             {
                 return Conflict("User already exists");
             }
-            ChatHub.users.Add(new User() { UserName = userName, UserId = userId });
+            ChatHub.users.Add(new User() { UserName = userName, UserId = userId, ProfileUrl = ProfilePictures.ProfilePicturesList[random.Next(0,19)] });
             return userId;
         }
 
