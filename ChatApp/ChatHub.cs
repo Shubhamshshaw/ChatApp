@@ -78,22 +78,24 @@ public class ChatHub : Hub
         }
 
         await Clients.Caller.SendAsync("UserId", userId);
-        // Track online users
-        await base.OnConnectedAsync();
         //await Clients.Caller.SendAsync("Messages", messages);
         var user = Context.User;
-        Console.WriteLine("new connection, total: " + ++counter);
         var connectedUser = users.Where(s => s.UserId.ToLower().Equals(userId.ToLower())).FirstOrDefault();
         if (connectedUser is not null)
         {
             connectedUser.ConnectionIdList.Add(Context.ConnectionId);
-            await Clients.Caller.SendAsync("login", "Successful");
+            await Clients.Caller.SendAsync("login", Context.ConnectionId);
         }
         else
         {
             await Clients.Caller.SendAsync("login", "failed");
             throw new Exception("User Missing");
         }
+
+
+        // Track online users
+        await base.OnConnectedAsync();
+        Console.WriteLine("new connection, total: " + ++counter);
     }
 
     public override async Task OnDisconnectedAsync(Exception? exception)
