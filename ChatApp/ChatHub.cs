@@ -10,8 +10,8 @@ public class ChatHub : Hub
 
     public ChatHub()
     {
-        users.Add(new User() { UserName = "Admin" });
-        users.Add(new User() { UserName = "User1" });
+        users.Add(new User() { UserName = "Admin", UserId = "Admin" });
+        users.Add(new User() { UserName = "User1", UserId = "User1" });
         if (messages.Count == 0)
         {
             messages.Add(new Message()
@@ -19,7 +19,7 @@ public class ChatHub : Hub
                 SenderId = "Admin",
                 ReceiverId = "User1",
                 ReceiverType = ReceiverType.individual,
-                Content = "Hi User2, I am Admin.",
+                Content = "Hi User1, I am Admin.",
                 TenantId = Guid.NewGuid(),
                 MessageType = MessageType.normal,
                 Reactions = new List<Reaction>(),
@@ -43,9 +43,9 @@ public class ChatHub : Hub
         }
     }
 
-    public async Task SendMessage(string senderId, string userName, string message)
+    public async Task SendMessage(string senderId, string userId, string message)
     {
-        var receiverLists = users.Where(s => s.UserName == userName || s.UserName == senderId).Select(s => s.ConnectionIdList);
+        var receiverLists = users.Where(s => s.UserId == userId || s.UserId == senderId).Select(s => s.ConnectionIdList);
         var receivers = new List<string>();
         foreach (var receiver in receiverLists)
         {
@@ -55,7 +55,7 @@ public class ChatHub : Hub
         messages.Add(new Message()
         {
             SenderId = senderId,
-            ReceiverId = userName,
+            ReceiverId = userId,
             ReceiverType = ReceiverType.individual,
             Content = message,
             TenantId = Guid.NewGuid(),
@@ -70,32 +70,27 @@ public class ChatHub : Hub
     public override async Task OnConnectedAsync()
     {
         var httpContext = Context.GetHttpContext();
-        var userName = httpContext?.Request.Query["username"].ToString();
+        var userId = httpContext?.Request.Query["userid"].ToString();
 
-        if (string.IsNullOrEmpty(userName))
+        if (string.IsNullOrEmpty(userId))
         {
-            userName = $"User {users.Count + 1}";
+            throw new Exception("User Id is missing");
         }
 
-        await Clients.Caller.SendAsync("UserName", userName);
+        await Clients.Caller.SendAsync("UserId", userId);
         // Track online users
         await base.OnConnectedAsync();
-        await Clients.Caller.SendAsync("Messages", messages);
+        //await Clients.Caller.SendAsync("Messages", messages);
         var user = Context.User;
         Console.WriteLine("new connection, total: " + ++counter);
-        var connectedUser = users.Where(s => s.UserName.ToLower().Equals(userName.ToLower())).FirstOrDefault();
+        var connectedUser = users.Where(s => s.UserId.ToLower().Equals(userId.ToLower())).FirstOrDefault();
         if (connectedUser is not null)
         {
             connectedUser.ConnectionIdList.Add(Context.ConnectionId);
         }
         else
         {
-            users.Add(new User()
-            {
-                UserName = userName,
-                UserId = Context.UserIdentifier,
-                ConnectionIdList = new List<string> { Context.ConnectionId }
-            });
+            throw new Exception("Missing connection Id");
         }
     }
 
