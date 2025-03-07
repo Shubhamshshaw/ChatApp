@@ -22,11 +22,7 @@ builder.Services.AddSignalR(options =>
 // Add IHttpContextAccessor for dependency injection
 builder.Services.AddHttpContextAccessor();
 
-// Add AutoMapper and specify the assembly to scan for profiles
-builder.Services.AddAutoMapper(cfg =>
-{
-    cfg.AddProfile<MappingProfile>(); // Ensure MappingProfile is correctly set up
-}, typeof(MappingProfile).Assembly);  // You can specify the type or the assembly where profiles are defined
+builder.Services.AddAutoMapper(typeof(MappingProfile));
 
 // Add MongoDB connection
 builder.Services.AddSingleton<IMongoClient>(sp => new MongoClient("your_mongodb_connection_string"));
