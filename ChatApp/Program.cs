@@ -1,3 +1,4 @@
+using ChatApp;
 using MongoDB.Driver;
 
 var builder = WebApplication.CreateBuilder(args);
@@ -16,6 +17,8 @@ builder.Services.AddSignalR(options =>
 });
 
 builder.Services.AddHttpContextAccessor();
+
+builder.Services.AddAutoMapper(typeof(MappingProfile));
 
 // Add MongoDB
 builder.Services.AddSingleton<IMongoClient>(sp => new MongoClient("your_mongodb_connection_string"));
