@@ -100,7 +100,7 @@ public class ChatHub : Hub
         var receivers = new List<string>();
         foreach (var receiver in receiverLists)
         {
-            receivers.AddRange(receiver);
+            receivers.AddRange(receiver);   
         }
         await Clients.Clients(receivers).SendAsync("ReceiveMessage", senderId, message);
         messages.Add(new Message()
@@ -182,7 +182,7 @@ public class ChatHub : Hub
     {
         try
         {
-            await Clients.Client(connectionId).SendAsync("Ping");
+            //await Clients.Client(connectionId).SendAsync("Ping");
         }
         catch (Exception ex)
         {
