@@ -27,7 +27,7 @@ namespace ChatApp.Controllers
             return _mapper.Map<List<ChatList>>(messages);
         }
 
-        [HttpGet("inboxMessages/{userId}/{receiverId}")]
+        [HttpGet("dm/{userId}/{receiverId}")]
         public List<Message> GetInboxMessages(string userId, string receiverId)
         {
             List<Message> messages1 = ChatHub.messages;
