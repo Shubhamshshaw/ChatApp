@@ -29,7 +29,8 @@ namespace ChatApp.Controllers
             foreach (var message in chatLists)
             {
                 var chatId = GetChatId(message, userId).Result;
-                message.ChatName = ChatHub.users.FirstOrDefault(u => u.UserId == message.ChatId)?.UserName ?? "Unknown User";
+                var user = ChatHub.users.FirstOrDefault(u => u.UserId == chatId);
+                message.ChatName = user?.UserName ?? "Unknown User";
                 message.ProfileURL = GetProfileURL(chatId).Result;
                 message.ChatId = chatId;
                 message.ActiveStatus = GetActiveStatus(chatId, new ChatHub()).Result;

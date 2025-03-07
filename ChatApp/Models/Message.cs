@@ -2,7 +2,7 @@
 
 public class Message
 {
-    public int Id { get; set; }
+    public int Id { get; set; } = ChatHub.messages.Count + 1;
     public string SenderId { get; set; }
     public string ReceiverId { get; set; }
     public ReceiverType ReceiverType { get; set; }

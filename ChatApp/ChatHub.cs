@@ -33,6 +33,7 @@ public class ChatHub : Hub
                 ReceivedBy = new List<Guid>(),
                 SeenBy = new List<Guid>(),
                 Attachments = new List<Attachment>(),
+                SentOn = DateTime.Now - TimeSpan.FromDays(365)
             });
             messages.Add(new Message()
             {
@@ -46,6 +47,7 @@ public class ChatHub : Hub
                 ReceivedBy = new List<Guid>(),
                 SeenBy = new List<Guid>(),
                 Attachments = new List<Attachment>(),
+                SentOn = DateTime.Now - TimeSpan.FromDays(2)
             });
             messages.Add(new Message()
             {
@@ -59,6 +61,7 @@ public class ChatHub : Hub
                 ReceivedBy = new List<Guid>(),
                 SeenBy = new List<Guid>(),
                 Attachments = new List<Attachment>(),
+                SentOn = DateTime.Now - TimeSpan.FromHours(5)
             });
             messages.Add(new Message()
             {
@@ -72,6 +75,7 @@ public class ChatHub : Hub
                 ReceivedBy = new List<Guid>(),
                 SeenBy = new List<Guid>(),
                 Attachments = new List<Attachment>(),
+                SentOn = DateTime.Now - TimeSpan.FromMinutes(10)
             });
             messages.Add(new Message()
             {
@@ -85,6 +89,7 @@ public class ChatHub : Hub
                 ReceivedBy = new List<Guid>(),
                 SeenBy = new List<Guid>(),
                 Attachments = new List<Attachment>(),
+                SentOn = DateTime.Now
             });
         }
     }
