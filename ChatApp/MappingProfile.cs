@@ -1,108 +1,81 @@
-﻿namespace ChatApp;
-using AutoMapper;
+﻿using AutoMapper;
+using Microsoft.AspNetCore.Http;
 using ChatApp.Models.ResponseObjects;
 using ChatApp.Models;
 using System;
 using System.Linq;
+using System.Threading.Tasks;
 
-public class MappingProfile : Profile
+namespace ChatApp
 {
-    IHttpContextAccessor httpContextAccessor;
-    public MappingProfile(IHttpContextAccessor _httpContextAccessor)
+    public class MappingProfile : Profile
     {
-        this.httpContextAccessor = _httpContextAccessor;
-        var chatHub = new ChatHub();
-        var userId = this.httpContextAccessor.HttpContext?.Request.Headers["userId"].ToString();
-        CreateMap<Message, ChatList>()
-            .ForMember(dest => dest.MessageId, opt => opt.MapFrom(src => src.Id.ToString()))
-            .ForMember(dest => dest.ChatName, opt => opt.MapFrom(src => GetUserName(src.ReceiverId)))
-            .ForMember(dest => dest.ChatId, opt => opt.MapFrom(src => GetChatId(src, userId).Result))
-            .ForMember(dest => dest.LastMessage, opt => opt.MapFrom(src => src.Content)) // last message is the content of the message
-            .ForMember(dest => dest.TimeStamp, opt => opt.MapFrom(src => GetTimeStamp(src.SentOn))) // Customize date formatting if needed
-            .ForMember(dest => dest.ActiveStatus, opt => opt.MapFrom(src => GetActiveStatus(userId, chatHub))) // Customize based on user's status
-            .ForMember(dest => dest.isPinned, opt => opt.MapFrom(src => IsChatPinned(userId, src))) // Customize based on user's pinned messages
-            .ForMember(dest => dest.IsLastMsgSeen, opt => opt.MapFrom(src => src.SeenBy)) // Customize based on seenBy logic
-            .ForMember(dest => dest.ProfileURL, opt => opt.MapFrom(src => GetProfileURL(userId, src))); // Customize based on user's profile URL
-    }
-
-    private async Task<string> GetProfileURL(string userId, Message src)
-    {
-        var chatId = await GetChatId(src, userId);
-        return ChatHub.users.FirstOrDefault(u => u.UserId == chatId)?.ProfileUrl ?? "Unknown Profile URL";
-    }
-
-    private string GetUserName(string receiverId)
-    {
-        return ChatHub.users.FirstOrDefault(u => u.UserId == receiverId)?.UserName ?? "Unknown User";
-    }
-
-    private string GetTimeStamp(DateTime sentOn)
-    {
-        // If sentOn is DateTime.MinValue, return "Not Set"
-        if (sentOn == DateTime.MinValue)
+        public MappingProfile()
         {
-            return "Not Set";
+            // Define your mapping configuration
+            CreateMap<Message, ChatList>()
+                .ForMember(dest => dest.MessageId, opt => opt.MapFrom(src => src.Id.ToString()))
+                .ForMember(dest => dest.ChatName, opt => opt.MapFrom((src, dest, member, context) => GetUserName(src.ReceiverId, context)))
+                .ForMember(dest => dest.ChatId, opt => opt.MapFrom((src, dest, member, context) => GetChatId(src, context).Result))
+                .ForMember(dest => dest.LastMessage, opt => opt.MapFrom(src => src.Content))
+                .ForMember(dest => dest.TimeStamp, opt => opt.MapFrom(src => GetTimeStamp(src.SentOn)))
+                .ForMember(dest => dest.ActiveStatus, opt => opt.MapFrom((src, dest, member, context) => GetActiveStatus(src.ReceiverId, context).Result))
+                .ForMember(dest => dest.isPinned, opt => opt.MapFrom((src, dest, member, context) => IsChatPinned(src, context).Result))
+                .ForMember(dest => dest.IsLastMsgSeen, opt => opt.MapFrom(src => src.SeenBy))
+                .ForMember(dest => dest.ProfileURL, opt => opt.MapFrom((src, dest, member, context) => GetProfileURL(src, context).Result));
         }
 
-        // Get the current time
-        var now = DateTime.Now;
-
-        // Check if the message was sent just now (within the last minute)
-        if (now - sentOn < TimeSpan.FromMinutes(1))
+        private string GetUserName(string receiverId, ResolutionContext context)
         {
-            return "Just Now";
+            // Retrieve IHttpContextAccessor from the context
+            var httpContextAccessor = (IHttpContextAccessor)context.Items["IHttpContextAccessor"];
+            return httpContextAccessor.HttpContext?.Request.Headers["userId"].ToString() ?? "Unknown User";
         }
 
-        // Check if the message was sent today
-        if (sentOn.Date == now.Date)
+        private async Task<string> GetProfileURL(Message src, ResolutionContext context)
         {
-            return sentOn.ToString("hh:mm tt"); // "01:00 PM"
+            var userId = GetUserIdFromContext(context);
+            var chatId = await GetChatId(src, context);
+            return ChatHub.users.FirstOrDefault(u => u.UserId == chatId)?.ProfileUrl ?? "Unknown Profile URL";
         }
 
-        // If it was sent on a different day, check if it's from a previous year
-        if (sentOn.Year != now.Year)
+        private string GetTimeStamp(DateTime sentOn)
         {
-            return sentOn.ToString("dd-MM-yyyy"); // "01-12-2024"
+            if (sentOn == DateTime.MinValue) return "Not Set";
+
+            var now = DateTime.Now;
+            if (now - sentOn < TimeSpan.FromMinutes(1)) return "Just Now";
+            if (sentOn.Date == now.Date) return sentOn.ToString("hh:mm tt");
+
+            return sentOn.Year != now.Year ? sentOn.ToString("dd-MM-yyyy") : sentOn.ToString("dd-MM");
         }
 
-        // If it was sent on a different day this year, return date in "dd-MM" format
-        return sentOn.ToString("dd-MM"); // "01-12"
-    }
-
-    private static async Task<ActiveStatus> GetActiveStatus(string userId, ChatHub chatHub)
-    {
-        // Implement your logic to get the active status of the user
-        var result = await chatHub.CheckActiveStatus(userId);
-        if (result)
+        private async Task<string> GetChatId(Message src, ResolutionContext context)
         {
-            return ActiveStatus.Available;
-        }
-        else
-        {
-            return ActiveStatus.Offline;
-        }
-    }
-
-    private static async Task<string> GetChatId(Message src, string userId)
-    {
-        // Check if the userId is available
-        if (string.IsNullOrEmpty(userId))
-        {
-            // Handle case where userId is missing (could log this or handle the error appropriately)
-            throw new Exception("UserId header is missing or invalid.");
+            var userId = GetUserIdFromContext(context);
+            return src.SenderId == userId ? src.ReceiverId : src.SenderId;
         }
 
-        // Determine ChatId based on SenderId and ReceiverId
-        return src.SenderId == userId ? src.ReceiverId : src.SenderId;
-    }
-
-    private async Task<bool> IsChatPinned(string userId, Message src)
-    {
-        var chatId = await GetChatId(src, userId);
-        if (ChatHub.users.FirstOrDefault(u => u.UserId == userId).PinnedChatIdList.Contains(chatId))
+        private string GetUserIdFromContext(ResolutionContext context)
         {
-            return true;
+            // Retrieve IHttpContextAccessor from context
+            var httpContextAccessor = (IHttpContextAccessor)context.Items["IHttpContextAccessor"];
+            return httpContextAccessor.HttpContext?.Request.Headers["userId"].ToString();
         }
-        return false;
+
+        private async Task<ActiveStatus> GetActiveStatus(string receiverId, ResolutionContext context)
+        {
+            var userId = GetUserIdFromContext(context);
+            var chatHub = new ChatHub();
+            var isActive = await chatHub.CheckActiveStatus(userId);
+            return isActive ? ActiveStatus.Available : ActiveStatus.Offline;
+        }
+
+        private async Task<bool> IsChatPinned(Message src, ResolutionContext context)
+        {
+            var userId = GetUserIdFromContext(context);
+            var chatId = await GetChatId(src, context);
+            return ChatHub.users.FirstOrDefault(u => u.UserId == userId)?.PinnedChatIdList.Contains(chatId) ?? false;
+        }
     }
 }
