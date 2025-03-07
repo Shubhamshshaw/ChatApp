@@ -21,7 +21,7 @@ namespace ChatApp.Controllers
         public List<ChatList?> GetAllLastMessages(string userId)
         {
             new ChatHub();
-            List<Message?> messages = ChatHub.messages
+            List<Message> messages = ChatHub.messages
                 .Where(m => m.ReceiverId == userId || m.SenderId == userId)
                 .ToList();
             var chatLists = _mapper.Map<List<ChatList>>(messages);
