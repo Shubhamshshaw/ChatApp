@@ -28,5 +28,15 @@ namespace ChatApp.Controllers
             }
             return true;
         }
+
+        [HttpGet("allUsers")]
+        public ActionResult<List<User>> GetAllUsers()
+        {
+            if (ChatHub.users.Any())
+            {
+                return BadRequest(ChatHub.users);
+            }
+            return new List<User>();
+        }
     }
 }
