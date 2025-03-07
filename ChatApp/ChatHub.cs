@@ -10,6 +10,7 @@ public class ChatHub : Hub
 
     public ChatHub()
     {
+        users.Clear();
         users.Add(new User() { UserName = "Admin", UserId = "Admin" });
         users.Add(new User() { UserName = "User1", UserId = "User1" });
         if (messages.Count == 0)
@@ -79,7 +80,7 @@ public class ChatHub : Hub
 
         await Clients.Caller.SendAsync("UserId", userId);
         //await Clients.Caller.SendAsync("Messages", messages);
-        var user = Context.User;
+        //var user = Context.User;
         var connectedUser = users.Where(s => s.UserId.ToLower().Equals(userId.ToLower())).FirstOrDefault();
         if (connectedUser is not null)
         {
@@ -103,5 +104,43 @@ public class ChatHub : Hub
         // Track offline users
         await base.OnDisconnectedAsync(exception);
         Console.WriteLine("lost connection, total: " + --counter);
+    }
+
+    public async Task<bool> CheckActiveStatus(string userId)
+    {
+        await RemoveZombieConnections(userId);
+        if(users.Any(u => u.UserId == userId))
+        {
+            return true;
+        }
+        else
+        {
+            return false;
+        }
+    }
+
+    private async Task RemoveZombieConnections(string userId)
+    {
+        // Implement your logic to check if the connection is "zombie"
+        // For example, you can ping the connection or check for the last active time
+        var userConnections = users.Where(u => u.UserId == userId).Select(u => u.ConnectionIdList).FirstOrDefault();
+        foreach (var connectionId in userConnections)
+        {
+            await PingConnection(connectionId, userId);
+        }
+    }
+    private async Task PingConnection(string connectionId, string userId)
+    {
+        try
+        {
+            await Clients.Client(connectionId).SendAsync("Ping");
+        }
+        catch (Exception ex)
+        {
+            // Log exception or handle failed ping
+            // If ping fails, mark connection as zombie
+            var user = users.FirstOrDefault(u => u.UserId == userId);
+            user.ConnectionIdList.Remove(connectionId);
+        }
     }
 }

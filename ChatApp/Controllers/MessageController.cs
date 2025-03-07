@@ -1,5 +1,8 @@
-﻿using ChatApp.Models;
+﻿using AutoMapper;
+using ChatApp.Models;
+using ChatApp.Models.ResponseObjects;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.Extensions.Caching.Memory;
 using System.Linq;
 
 namespace ChatApp.Controllers
@@ -8,15 +11,20 @@ namespace ChatApp.Controllers
     [Route("[controller]")]
     public class MessageController : ControllerBase
     {
+        private readonly IMapper _mapper;
+        public MessageController(IMapper mapper)
+        {
+            _mapper = mapper;
+        }
         [HttpGet("allLastMessages/{userId}")]
-        public List<Message?> GetAllLastMessages(string userId)
+        public List<ChatList> GetAllLastMessages(string userId)
         {
             List<Message?> messages = ChatHub.messages
-                .Where(m => m.ReceiverId == userId)
+                .Where(m => m.ReceiverId == userId || m.SenderId == userId)
                 .GroupBy(m => m.SenderId)
                 .Select(g => g.OrderByDescending(m => m.SentOn).FirstOrDefault())
                 .ToList();
-            return messages;
+            return _mapper.Map<List<ChatList>>(messages);
         }
 
         [HttpGet("inboxMessages/{userId}/{receiverId}")]
