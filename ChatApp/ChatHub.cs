@@ -14,6 +14,9 @@ public class ChatHub : Hub
         {
             users.Add(new User() { UserName = "Admin", UserId = "Admin" });
             users.Add(new User() { UserName = "User1", UserId = "User1" });
+            users.Add(new User() { UserName = "User2", UserId = "User2" });
+            users.Add(new User() { UserName = "User3", UserId = "User3" });
+            users.Add(new User() { UserName = "User4", UserId = "User4" });
         }
 
         if (messages.Count == 0)
@@ -22,6 +25,45 @@ public class ChatHub : Hub
             {
                 SenderId = "Admin",
                 ReceiverId = "User1",
+                ReceiverType = ReceiverType.individual,
+                Content = "Hi User1, I am Admin.",
+                TenantId = Guid.NewGuid(),
+                MessageType = MessageType.normal,
+                Reactions = new List<Reaction>(),
+                ReceivedBy = new List<Guid>(),
+                SeenBy = new List<Guid>(),
+                Attachments = new List<Attachment>(),
+            });
+            messages.Add(new Message()
+            {
+                SenderId = "Admin",
+                ReceiverId = "User4",
+                ReceiverType = ReceiverType.individual,
+                Content = "Hi User1, I am Admin.",
+                TenantId = Guid.NewGuid(),
+                MessageType = MessageType.normal,
+                Reactions = new List<Reaction>(),
+                ReceivedBy = new List<Guid>(),
+                SeenBy = new List<Guid>(),
+                Attachments = new List<Attachment>(),
+            });
+            messages.Add(new Message()
+            {
+                SenderId = "Admin",
+                ReceiverId = "User3",
+                ReceiverType = ReceiverType.individual,
+                Content = "Hi User1, I am Admin.",
+                TenantId = Guid.NewGuid(),
+                MessageType = MessageType.normal,
+                Reactions = new List<Reaction>(),
+                ReceivedBy = new List<Guid>(),
+                SeenBy = new List<Guid>(),
+                Attachments = new List<Attachment>(),
+            });
+            messages.Add(new Message()
+            {
+                SenderId = "Admin",
+                ReceiverId = "User2",
                 ReceiverType = ReceiverType.individual,
                 Content = "Hi User1, I am Admin.",
                 TenantId = Guid.NewGuid(),
@@ -126,7 +168,7 @@ public class ChatHub : Hub
     {
         // Implement your logic to check if the connection is "zombie"
         // For example, you can ping the connection or check for the last active time
-        var userConnections = users.Where(u => u.UserId == userId).Select(u => u.ConnectionIdList).FirstOrDefault();
+        var userConnections = users.Where(u => u.UserId == userId).Select(u => u.ConnectionIdList).FirstOrDefault() ?? new List<string>();
         foreach (var connectionId in userConnections)
         {
             await PingConnection(connectionId, userId);
