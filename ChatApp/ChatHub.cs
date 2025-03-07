@@ -87,10 +87,12 @@ public class ChatHub : Hub
         if (connectedUser is not null)
         {
             connectedUser.ConnectionIdList.Add(Context.ConnectionId);
+            await Clients.Caller.SendAsync("login", "Successful");
         }
         else
         {
-            throw new Exception("Missing connection Id");
+            await Clients.Caller.SendAsync("login", "failed");
+            throw new Exception("User Missing");
         }
     }
 
