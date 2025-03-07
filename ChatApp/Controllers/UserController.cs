@@ -38,5 +38,15 @@ namespace ChatApp.Controllers
             }
             return new List<User>();
         }
+
+        [HttpGet("users/search/{userName}")]
+        public ActionResult<List<User>> GetUsersOnSearch(string userName)
+        {
+            if (ChatHub.users.Where(u => u.UserName.Contains(userName)).Any())
+            {
+                return BadRequest(ChatHub.users);
+            }
+            return new List<User>();
+        }
     }
 }
