@@ -10,9 +10,12 @@ public class ChatHub : Hub
 
     public ChatHub()
     {
-        users.Clear();
-        users.Add(new User() { UserName = "Admin", UserId = "Admin" });
-        users.Add(new User() { UserName = "User1", UserId = "User1" });
+        if (users.Count == 0)
+        {
+            users.Add(new User() { UserName = "Admin", UserId = "Admin" });
+            users.Add(new User() { UserName = "User1", UserId = "User1" });
+        }
+
         if (messages.Count == 0)
         {
             messages.Add(new Message()
