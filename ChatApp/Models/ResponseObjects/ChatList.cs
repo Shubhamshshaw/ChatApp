@@ -16,6 +16,7 @@
 
         public string SenderId { get; set; }
         public string ReceiverId { get; set; }
+        public DateTime SentOn { get; set; }
     }
 
     public enum ActiveStatus{

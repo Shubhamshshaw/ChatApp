@@ -19,6 +19,7 @@ namespace ChatApp
                 .ForMember(dest => dest.SenderId, opt => opt.MapFrom(src => src.SenderId))
                 .ForMember(dest => dest.LastMessage, opt => opt.MapFrom(src => src.Content))
                 .ForMember(dest => dest.TimeStamp, opt => opt.MapFrom(src => GetTimeStamp(src.SentOn)))
+                .ForMember(dest => dest.SentOn, opt => opt.MapFrom(src => src.SentOn))
                 .ForMember(dest => dest.IsLastMsgSeen, opt => opt.MapFrom(src => src.SeenBy.Any()));
         }
 

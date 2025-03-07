@@ -18,7 +18,7 @@ namespace ChatApp.Controllers
             _mapper = mapper;
         }
         [HttpGet("allLastChats/{userId}")]
-        public List<ChatList> GetAllLastMessages(string userId)
+        public List<ChatList?> GetAllLastMessages(string userId)
         {
             new ChatHub();
             List<Message?> messages = ChatHub.messages
@@ -27,6 +27,7 @@ namespace ChatApp.Controllers
                 .Select(g => g.OrderByDescending(m => m.SentOn).FirstOrDefault())
                 .ToList();
             var chatLists = _mapper.Map<List<ChatList>>(messages);
+
             foreach (var message in chatLists)
             {
                 var chatId = GetChatId(message, userId).Result;
@@ -37,7 +38,10 @@ namespace ChatApp.Controllers
                 message.IsPinned = IsChatPinned(userId).Result;
                 message.ProfileURL = GetProfileURL(chatId).Result;
             }
-            return chatLists;
+
+            return chatLists
+                .GroupBy(m => m.SenderId)
+                .Select(g => g.OrderByDescending(m => m.SentOn).FirstOrDefault()).ToList<ChatList?>();
         }
 
         [HttpGet("dm/{userId}/{receiverId}")]
