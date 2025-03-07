@@ -22,7 +22,7 @@ public class MappingProfile : Profile
             .ForMember(dest => dest.ActiveStatus, opt => opt.MapFrom(src => GetActiveStatus(userId, chatHub))) // Customize based on user's status
             .ForMember(dest => dest.isPinned, opt => opt.MapFrom(src => IsChatPinned(userId, src))) // Customize based on user's pinned messages
             .ForMember(dest => dest.IsLastMsgSeen, opt => opt.MapFrom(src => src.SeenBy)) // Customize based on seenBy logic
-            .ForMember(dest => dest.ProfileURL, opt => opt.MapFrom(src => GetProfileURL(userId, src)); // Customize based on user's profile URL
+            .ForMember(dest => dest.ProfileURL, opt => opt.MapFrom(src => GetProfileURL(userId, src))); // Customize based on user's profile URL
     }
 
     private async Task<string> GetProfileURL(string userId, Message src)
