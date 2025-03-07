@@ -16,6 +16,7 @@ namespace ChatApp.Controllers
             {
                 return Conflict("User already exists");
             }
+            new ProfilePictures();
             ChatHub.users.Add(new User() { UserName = userName, UserId = userId, ProfileUrl = ProfilePictures.ProfilePicturesList[random.Next(0,19)] });
             return userId;
         }
@@ -35,7 +36,7 @@ namespace ChatApp.Controllers
         {
             if (ChatHub.users.Any())
             {
-                return BadRequest(ChatHub.users);
+                return Ok(ChatHub.users);
             }
             return new List<User>();
         }
@@ -45,7 +46,7 @@ namespace ChatApp.Controllers
         {
             if (ChatHub.users.Where(u => u.UserName.Contains(userName)).Any())
             {
-                return BadRequest(ChatHub.users);
+                return Ok(ChatHub.users);
             }
             return new List<User>();
         }
