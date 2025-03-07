@@ -40,7 +40,7 @@ namespace ChatApp.Controllers
             }
 
             return chatLists
-                .GroupBy(m => m.SenderId)
+                .GroupBy(m => m.ChatId)
                 .Select(g => g.OrderByDescending(m => m.SentOn).FirstOrDefault()).ToList<ChatList?>();
         }
 
