@@ -143,7 +143,6 @@ public class ChatHub : Hub
             throw new Exception("User Missing");
         }
 
-
         // Track online users
         await base.OnConnectedAsync();
         Console.WriteLine("new connection, total: " + ++counter);
