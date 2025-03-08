@@ -31,16 +31,3 @@ jobs:
     - name: Build Docker image
       run: |
         docker build -f Dockerfile -t chatapp-image .
-
-    - name: Install Render CLI
-      run: |
-        curl -sSL https://render.com/cli/install | bash
-        sudo mv render /usr/local/bin
-
-    - name: Log in to Render
-      run: |
-        echo "${{ secrets.RENDER_API_KEY }}" | render login --api-key
-
-    - name: Deploy to Render
-      run: |
-        render deploy --docker --service-name chatapp-render-app-name --region us --image chatapp-image
