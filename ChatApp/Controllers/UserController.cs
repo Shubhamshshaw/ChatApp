@@ -11,6 +11,7 @@ namespace ChatApp.Controllers
         [HttpPost("registerUser/{userName}/{userId}")]
         public ActionResult<string> GetAllLastMessages(string userName, string userId)
         {
+            new ChatHub();
             Random random = new Random();
             if (ChatHub.users.Where(u => u.UserId == userId).ToList().Any())
             {
@@ -24,6 +25,7 @@ namespace ChatApp.Controllers
         [HttpGet("IsUserIdAvailable/{userId}")]
         public ActionResult<bool> IsUserIdAvailable(string userId)
         {
+            new ChatHub();
             if (ChatHub.users.Where(u => u.UserId == userId).ToList().Any())
             {
                 return BadRequest(false);
@@ -34,6 +36,7 @@ namespace ChatApp.Controllers
         [HttpGet("allUsers")]
         public ActionResult<List<User>> GetAllUsers()
         {
+            new ChatHub();
             if (ChatHub.users.Any())
             {
                 return Ok(ChatHub.users);
