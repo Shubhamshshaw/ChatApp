@@ -44,11 +44,13 @@ namespace ChatApp.Controllers
         [HttpGet("users/search/{userName}")]
         public ActionResult<List<User>> GetUsersOnSearch(string userName)
         {
-            if (ChatHub.users.Where(u => u.UserName.ToLower().Contains(userName.ToLower())).Any())
+            new ChatHub();
+            var users = ChatHub.users.Where(u => u.UserName.ToLower().Contains(userName.ToLower()));
+            if (users.Any())
             {
-                return Ok(ChatHub.users);
+                return Ok(users);
             }
-            return new List<User>();
+            return NotFound(users);
         }
     }
 }
