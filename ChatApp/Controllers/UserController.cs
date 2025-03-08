@@ -14,7 +14,7 @@ namespace ChatApp.Controllers
             Random random = new Random();
             if (ChatHub.users.Where(u => u.UserId == userId).ToList().Any())
             {
-                return Conflict("User already exists");
+                return userId;
             }
             new ProfilePictures();
             ChatHub.users.Add(new User() { UserName = userName, UserId = userId, ProfileUrl = ProfilePictures.ProfilePicturesList[random.Next(0,19)] });
