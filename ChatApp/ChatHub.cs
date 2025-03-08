@@ -33,7 +33,8 @@ public class ChatHub : Hub
                 ReceivedBy = new List<Guid>(),
                 SeenBy = new List<Guid>(),
                 Attachments = new List<Attachment>(),
-                SentOn = DateTime.Now - TimeSpan.FromDays(365)
+                SentOn = DateTime.Now - TimeSpan.FromDays(365),
+                TimeStamp = GetTimeStamp(DateTime.Now - TimeSpan.FromDays(365))
             });
             messages.Add(new Message()
             {
@@ -47,7 +48,8 @@ public class ChatHub : Hub
                 ReceivedBy = new List<Guid>(),
                 SeenBy = new List<Guid>(),
                 Attachments = new List<Attachment>(),
-                SentOn = DateTime.Now - TimeSpan.FromDays(2)
+                SentOn = DateTime.Now - TimeSpan.FromDays(2),
+                TimeStamp = GetTimeStamp(DateTime.Now - TimeSpan.FromDays(2))
             });
             messages.Add(new Message()
             {
@@ -61,7 +63,8 @@ public class ChatHub : Hub
                 ReceivedBy = new List<Guid>(),
                 SeenBy = new List<Guid>(),
                 Attachments = new List<Attachment>(),
-                SentOn = DateTime.Now - TimeSpan.FromHours(5)
+                SentOn = DateTime.Now - TimeSpan.FromHours(5),
+                TimeStamp = GetTimeStamp(DateTime.Now - TimeSpan.FromHours(5))
             });
             messages.Add(new Message()
             {
@@ -75,7 +78,8 @@ public class ChatHub : Hub
                 ReceivedBy = new List<Guid>(),
                 SeenBy = new List<Guid>(),
                 Attachments = new List<Attachment>(),
-                SentOn = DateTime.Now - TimeSpan.FromMinutes(10)
+                SentOn = DateTime.Now - TimeSpan.FromMinutes(10),
+                TimeStamp = GetTimeStamp(DateTime.Now - TimeSpan.FromMinutes(10))
             });
             messages.Add(new Message()
             {
@@ -89,14 +93,15 @@ public class ChatHub : Hub
                 ReceivedBy = new List<Guid>(),
                 SeenBy = new List<Guid>(),
                 Attachments = new List<Attachment>(),
-                SentOn = DateTime.Now
+                SentOn = DateTime.Now,
+                TimeStamp = GetTimeStamp(DateTime.Now)
             });
         }
     }
 
     public async Task SendMessage(string senderId, string userId, string message)
     {
-        var receiverLists = users.Where(s => s.UserId == userId || s.UserId == senderId).Select(s => s.ConnectionIdList);
+        var receiverLists = users.Where(s => s.UserId == userId || s.UserId == senderId).Select(s => s.ConnectionIdList).ToList();
         var receivers = new List<string>();
         foreach (var receiver in receiverLists)
         {
@@ -115,7 +120,20 @@ public class ChatHub : Hub
             ReceivedBy = new List<Guid>(),
             SeenBy = new List<Guid>(),
             Attachments = new List<Attachment>(),
+            SentOn= DateTime.Now,
+            TimeStamp = GetTimeStamp(DateTime.Now)
         });
+    }
+
+    private string GetTimeStamp(DateTime sentOn)
+    {
+        if (sentOn == DateTime.MinValue) return "Not Set";
+
+        var now = DateTime.Now;
+        if (now - sentOn < TimeSpan.FromMinutes(1)) return "Just Now";
+        if (sentOn.Date == now.Date) return sentOn.ToString("hh:mm tt");
+
+        return sentOn.Year != now.Year ? sentOn.ToString("dd-MM-yyyy") : sentOn.ToString("dd-MM");
     }
 
     public override async Task OnConnectedAsync()
@@ -139,8 +157,7 @@ public class ChatHub : Hub
         }
         else
         {
-            await Clients.Caller.SendAsync("login", "failed");
-            throw new Exception("User Missing");
+            users.Add(new User() { UserName = userId, UserId = userId, ProfileUrl = "https://pbs.twimg.com/profile_images/1769741269327294464/bwPqFyxG_400x400.jpg", ConnectionIdList = { Context.ConnectionId } });
         }
 
         // Track online users

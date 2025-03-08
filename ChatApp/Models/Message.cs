@@ -14,6 +14,7 @@ public class Message
     public DateTime SentOn { get; set; }
     public List<Guid> SeenBy { get; set; }
     public List<Attachment> Attachments { get; set; }
+    public string TimeStamp { get; set; }
 }
 
 public class Reaction
