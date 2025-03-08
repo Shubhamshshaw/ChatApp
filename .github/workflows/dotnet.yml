@@ -30,7 +30,7 @@ jobs:
 
     - name: Build Docker image
       run: |
-        docker build -f .github/workflows/Dockerfile -t chatapp-image .
+        docker build -f Dockerfile -t chatapp-image .
 
     - name: Install Render CLI
       run: |
