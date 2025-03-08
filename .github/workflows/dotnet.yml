@@ -25,7 +25,14 @@ jobs:
       run: dotnet test --no-build --verbosity normal
     - name: Build Docker Image
       run: |
-        docker build -t chatapp-image .
-    - name: Run Docker Container (Optional)
+        docker build -f .github/workflows/Dockerfile -t chatapp-image .
+    - name: Login to Heroku
+      uses: akshnz/heroku-login-action@v1
+      with:
+        heroku_api_key: ${{ secrets.HEROKU_API_KEY }}
+    - name: Deploy to Heroku
       run: |
-        docker run -d -p 8080:80 --name chatapp-container chatapp-image
+        heroku container:login
+        heroku create chatapp-heroku-app-name --region us
+        heroku container:push web --app chatapp-heroku-app-name
+        heroku container:release web --app chatapp-heroku-app-name
