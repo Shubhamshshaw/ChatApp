@@ -8,31 +8,39 @@ on:
 
 jobs:
   build:
-
     runs-on: ubuntu-latest
 
     steps:
-    - uses: actions/checkout@v4
-    - name: Setup .NET
+    - name: Checkout code
+      uses: actions/checkout@v4
+
+    - name: Set up .NET
       uses: actions/setup-dotnet@v4
       with:
         dotnet-version: 8.0.x
+
     - name: Restore dependencies
       run: dotnet restore
-    - name: Build
+
+    - name: Build the application
       run: dotnet build --no-restore
-    - name: Test
+
+    - name: Run tests
       run: dotnet test --no-build --verbosity normal
-    - name: Build Docker Image
+
+    - name: Build Docker image
       run: |
         docker build -f .github/workflows/Dockerfile -t chatapp-image .
-    - name: Login to Heroku
-      uses: akshnz/heroku-login-action@v1
-      with:
-        heroku_api_key: ${{ secrets.HEROKU_API_KEY }}
-    - name: Deploy to Heroku
+
+    - name: Install Render CLI
       run: |
-        heroku container:login
-        heroku create chatapp-heroku-app-name --region us
-        heroku container:push web --app chatapp-heroku-app-name
-        heroku container:release web --app chatapp-heroku-app-name
+        curl -sSL https://render.com/cli/install | bash
+        sudo mv render /usr/local/bin
+
+    - name: Log in to Render
+      run: |
+        echo "${{ secrets.RENDER_API_KEY }}" | render login --api-key
+
+    - name: Deploy to Render
+      run: |
+        render deploy --docker --service-name chatapp-render-app-name --region us --image chatapp-image
